@@ -13,7 +13,7 @@ function AuthContextProvider(props) {
 
   async function getLoggedIn() {
     //This asynchronous function makes an HTTP GET request to http://localhost:3177/auth/loggedIn using axios.
-    const loggedInRes = await axios.get("http://localhost:3177/auth/loggedIn", {
+    const loggedInRes = await axios.get("http://https://food-donation-website-fv3s.onrender.com/auth/loggedIn", {
       withCredentials: true,
     }); //The request is made with credentials ({ withCredentials: true }), which allows sending cookies for authentication.
     //Upon receiving a response (loggedInRes), it updates the loggedIn and user states based on the data received from the server.
