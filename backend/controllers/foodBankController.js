@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
+const bcrypt = require("bcryptjs"); // Importing bcrypt for password hashing
 const FoodBank = require("../models/foodBankSchema"); // Importing FoodBank model/schema
 const Donations = require("../models/foodDonationSchema"); // Importing Donations model/schema
 const Requests = require("../models/foodRequestSchema"); // Importing Requests model/schema

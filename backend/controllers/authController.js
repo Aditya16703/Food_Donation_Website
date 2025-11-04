@@ -1,5 +1,5 @@
 // Import necessary modules
-const bcrypt = require("bcrypt"); // Module for hashing passwords
+const bcrypt = require("bcryptjs"); // Module for hashing passwords
 const jwt = require("jsonwebtoken"); // Module for generating and verifying JWTs
 const User = require("../models/userSchema"); // Import User model
 const FoodBank = require("../models/foodBankSchema"); // Import FoodBank model
