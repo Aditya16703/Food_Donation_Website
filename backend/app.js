@@ -22,7 +22,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: ["https://food-donation-website-fv3s.onrender.com"],
+    origin: ["https://https://fooddonationwebsiteannadata.netlify.app", "http://localhost:3000"],
     credentials: true,
   })
 );
