@@ -42,7 +42,7 @@ const Navbar = (props) => {
                 draggable={false}
                 alt="Annadata Logo"
               />
-              <div className="text-2xl font-bold ml-2 text-green-600">
+              <div className="text-2xl font-bold ml-2 text-green-600  dark:text-white">
                 Annadata
               </div>
             </div>
