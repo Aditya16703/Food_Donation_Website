@@ -1,32 +1,32 @@
 import React from "react";
-import { Link } from "react-router-dom"; // Removed "Outlet" because it was not used
+import { Link } from "react-router-dom";
 
-// Destructured props directly for cleaner code
+// Component for icon + title
 const Temp = ({ icon, title }) => {
   return (
-    <>
-      {/* Shows an icon and title with some spacing */}
-      <i className={`fa-solid ${icon}`}></i>&nbsp;&nbsp;&nbsp;
-      {title}
-    </>
+    <div className="flex items-center gap-2">
+      <span aria-hidden="true">
+        <i className={`fa-solid ${icon}`}></i>
+      </span>
+      <span>{title}</span>
+    </div>
   );
 };
 
-// Destructured props here too for simplicity
+// Main UserNav component
 const UserNav = ({ data }) => {
-  // Fixed Tailwind colors (bg-gray → bg-gray-800, text-white-900 → text-white)
+  // Tailwind classes for nav links
   const s1 =
-    "block m-9 ml-20 px-9 py-2 font-semibold text-lg rounded-full shadow-sm bg-gray-800 text-white hover:drop-shadow-md hover:opacity-80";
+    "block m-4 px-6 py-2 font-semibold text-lg rounded-full shadow-sm bg-gray-800 text-white hover:drop-shadow-md hover:opacity-80 dark:bg-gray-900 dark:text-white transition-colors duration-200";
 
   return (
-    <div className="fixed">
-      {data.map((e, index) => (
-        //  Added key={index} → React needs a unique key for each list item
-        <Link key={index} to={e.to} className={s1}>
+    <nav className="fixed top-10 left-4 z-50 flex flex-col">
+      {data.map((e) => (
+        <Link key={e.to} to={e.to} className={s1}>
           <Temp icon={e.icon} title={e.title} />
         </Link>
       ))}
-    </div>
+    </nav>
   );
 };
 

@@ -36,7 +36,7 @@ const Bank = (props) => {
     { to: "/bank/registerBank", icon: "fa-rotate", title: "Register new Camp" },
   ];
   return (
-    <div className="flex w-full h-96">
+    <div className="flex w-full h-96 bg-white dark:bg-gray-dark text-gray-900 dark:text-white">
       <UserNav data={nav} />
       <div className="ml-96 w-full flex justify-center pr-24">
         {handle === "profile" && <EditProfile />}

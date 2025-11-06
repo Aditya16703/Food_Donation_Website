@@ -5,9 +5,15 @@ import axios from "../Api";
 import AuthContext from "../context/AuthContext";
 import mapboxgl from "mapbox-gl";
 
+// --------------------------- COMPONENT PURPOSE ---------------------------
+// This component allows a food bank user to edit their profile details.
+// It fetches data from the user context, displays them in editable inputs,
+// and allows updates including location (latitude, longitude) using Mapbox.
 const EditProfile = () => {
   const { handle } = useParams();
   const { getLoggedIn, user } = useContext(AuthContext);
+
+  // --------------------------- STATE VARIABLES ---------------------------
   const [name, setName] = useState("");
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,14 +21,17 @@ const EditProfile = () => {
   const [state, setState] = useState(0);
   const [district, setDistrict] = useState(0);
   const [address, setAddress] = useState("");
-  const [edit, setEdit] = useState(true);
+  const [edit, setEdit] = useState(true); // Controls edit mode (true = read-only)
   const [hospital, setHospital] = useState("");
   const [contactPerson, setContactPerson] = useState("");
   const [website, setWebsite] = useState("");
   const [category, setCategory] = useState("Private");
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
+
+  // --------------------------- FILL USER DATA ---------------------------
   useEffect(() => {
+    // Load data from logged-in user
     setName(user.name);
     setHospital(user.hospital);
     setContactPerson(user.contactPerson);
@@ -30,89 +39,77 @@ const EditProfile = () => {
     setWebsite(user.website);
     setMail(user.email);
     setPhone(user.phone);
-    // data.states.map((e, i) => {
-    //     if (e.state === user.state) {
-    //         setState(i);
-    //         setDistrict(e.districts.indexOf(user.district));
-    //     }
-    // });
 
+    // Match user's state and district from JSON file
     data.states.forEach((e, i) => {
       if (e.state === user.state) {
         setState(i);
         setDistrict(e.districts.indexOf(user.district));
       }
     });
+
+    // Default password is hidden placeholder
     setPassword("Lorem ipsum dolor sit amet consectetur adipisicing elit.");
     setAddress(user.address);
     setLatitude(user.latitude);
     setLongitude(user.longitude);
   }, []);
 
-  //Ensures the map and marker reflect the latest coordinates whenever the latitude or longitude changes
+  // --------------------------- MAP DISPLAY ---------------------------
+  // Re-renders the map whenever coordinates change
   useEffect(() => {
-    //Checks if longitude is equal to 0. If true, it immediately returns, preventing the execution of the rest of the code inside the effect function.
-    if (longitude === 0) return;
+    if (longitude === 0) return; // skip if coords not loaded yet
     mapboxgl.accessToken =
       "pk.eyJ1IjoiY29yb2JvcmkiLCJhIjoiY2s3Y3FyaWx0MDIwbTNpbnc4emxkdndrbiJ9.9KeSiPVeMK0rWvJmTE0lVA";
-    var map = new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       container: "map",
       style: "mapbox://styles/mapbox/streets-v12",
       center: [longitude, latitude],
       zoom: 10.7,
     });
     new mapboxgl.Marker().setLngLat([longitude, latitude]).addTo(map);
-  }, [latitude, longitude]); //Specifies [latitude, longitude] as the dependency array for the useEffect. This means the effect will run whenever latitude or longitude changes.
+  }, [latitude, longitude]);
 
-  const update = async (e) => {
-    //Creates a formData object that collects values from form inputs
+  // --------------------------- UPDATE PROFILE ---------------------------
+  const update = async () => {
     const formData = {
-      name: name,
+      name,
       email: mail,
-      phone: phone,
+      phone,
       state: data.states[state].state,
       district: data.states[state].districts[district],
-      address: address,
-      latitude: latitude,
-      longitude: longitude,
-      hospital: hospital,
-      contactPerson: contactPerson,
-      website: website,
-      category: category,
+      address,
+      latitude,
+      longitude,
+      hospital,
+      contactPerson,
+      website,
+      category,
     };
 
-    //axios.put to send an HTTP PUT request to the server at the /bank endpoint with the formData object.
-    await axios
-      .put(`/bank`, formData) //If the request is successful (.then):
-      //Toggles the edit state variable using setEdit(!edit).
-      //Calls the getLoggedIn function to refresh the authentication status or user data.
-      //Displays a success alert saying "Blood Bank updated successfully".
-      .then(
-        async (response) => {
-          setEdit(!edit);
-          //By calling getLoggedIn, any changes made to the blood bank details are immediately fetched and displayed in the application, keeping the user interface in sync with the latest data
-          // here edit becomes false after this database data gets updated and edit is made true(line 45 of CampsCheck resolves put request and at last line after updation makes it true to be aditable again)
-          await getLoggedIn();
-          alert("Food Bank updated successfully");
-        },
-        (error) => {
-          alert("Something went wrong in Bank Editprofile.js");
-        }
-      );
+    await axios.put(`/bank`, formData).then(
+      async (response) => {
+        setEdit(true); // Switch back to view mode
+        await getLoggedIn(); // Refresh user data from backend
+        alert("Food Bank updated successfully");
+      },
+      (error) => {
+        alert("Something went wrong while updating Food Bank profile");
+      }
+    );
   };
-  //updating longitude and latitude if it got changes while updation
+
+  // --------------------------- FETCH GEOLOCATION ---------------------------
   const fetchGeo = async () => {
-    //if no change in latitude and longitude no need to do anything
+    // If no change in lat/long, no need to fetch again
     if (latitude === user.latitude && longitude === user.longitude) return;
+
     await navigator.geolocation.getCurrentPosition(
       (p) => {
-        //on success It updates the state variables latitude and longitude with the coordinates obtained from the p.coords object.
         setLatitude(p.coords.latitude);
         setLongitude(p.coords.longitude);
       },
       () => {
-        //on failure, this callback is executed.
-        //t resets the state variables latitude and longitude to the user's saved values.
         alert("Please allow location access");
         setLatitude(user.latitude);
         setLongitude(user.longitude);
@@ -120,32 +117,27 @@ const EditProfile = () => {
       {
         enableHighAccuracy: true,
         timeout: 5000,
-        maximumAge: 0,
-        //Prevents the use of cached location data.
+        maximumAge: 0, // prevent cached data
       }
     );
   };
 
-  //The fetchGeo function ensures that the current geographical coordinates of the user are fetched and updated in the state.
-  // It handles both success and error scenarios and ensures that the coordinates are only fetched if they have changed
-  //from the user's saved values. If the user denies location access, it alerts them and resets the coordinates to the saved values.
-
+  // --------------------------- UI PART ---------------------------
   return (
     <div>
       <section className="flex justify-center items-center">
         <form
           className="space-y-2"
-          action=""
           onSubmit={(e) => {
             e.preventDefault();
             update();
           }}
         >
-          <p className=""></p>
           <table className="w-full" cellPadding={15}>
+            {/* ---------- ROW 1 ---------- */}
             <tr>
               <td>
-                <label className="font-semibold  leading-8">
+                <label className="font-semibold leading-8">
                   Food Bank Name:<font color="red">*</font>
                 </label>
                 <input
@@ -154,13 +146,11 @@ const EditProfile = () => {
                   required
                   disabled={edit}
                   value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                  }}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </td>
               <td>
-                <label className="font-semibold  leading-8">
+                <label className="font-semibold leading-8">
                   Parent FoodBank Name:<font color="red">*</font>
                 </label>
                 <input
@@ -169,28 +159,27 @@ const EditProfile = () => {
                   required
                   disabled={edit}
                   value={hospital}
-                  onChange={(e) => {
-                    setHospital(e.target.value);
-                  }}
+                  onChange={(e) => setHospital(e.target.value)}
                 />
               </td>
               <td>
-                {" "}
-                <label className="font-semibold  leading-8">
+                <label className="font-semibold leading-8">
                   Contact Person:
                 </label>
                 <input
                   className="w-full p-3 text-md border border-silver rounded"
                   type="text"
-                  value={contactPerson}
                   disabled={edit}
+                  value={contactPerson}
                   onChange={(e) => setContactPerson(e.target.value)}
                 />
               </td>
             </tr>
+
+            {/* ---------- ROW 2 ---------- */}
             <tr>
               <td>
-                <label for="category" className="font-semibold  leading-8">
+                <label htmlFor="category" className="font-semibold leading-8">
                   Category:<font color="red">*</font>
                 </label>
                 <select
@@ -206,7 +195,6 @@ const EditProfile = () => {
                   <option value="Red Cross">Red Cross</option>
                 </select>
               </td>
-
               <td>
                 <label className="font-semibold leading-8">
                   Mobile:<font color="red">*</font>
@@ -214,7 +202,6 @@ const EditProfile = () => {
                 <input
                   className="w-full p-3 text-md border border-silver rounded"
                   type="number"
-                  placeholder="Enter your mobile"
                   required
                   disabled={edit}
                   value={phone}
@@ -222,56 +209,53 @@ const EditProfile = () => {
                 />
               </td>
               <td>
-                <label className="font-semibold  leading-8">Password:</label>
-                <font color="red">*</font>
+                <label className="font-semibold leading-8">
+                  Password:<font color="red">*</font>
+                </label>
                 <input
                   className="w-full p-3 text-md border border-silver rounded"
                   type="password"
-                  placeholder="Enter your password"
-                  required
                   disabled
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                 />
               </td>
             </tr>
-            <tr></tr>
+
+            {/* ---------- ROW 3 ---------- */}
             <tr>
               <td>
-                <label className="font-semibold  leading-8">Email:</label>
+                <label className="font-semibold leading-8">Email:</label>
                 <input
                   className="w-full p-3 text-md border border-silver rounded"
                   type="email"
-                  placeholder="Enter your email"
                   disabled={edit}
                   value={mail}
                   onChange={(e) => setMail(e.target.value)}
                 />
               </td>
               <td>
-                <label className="font-semibold  leading-8">Website:</label>
+                <label className="font-semibold leading-8">Website:</label>
                 <input
                   className="w-full p-3 text-md border border-silver rounded"
                   type="text"
-                  value={website}
                   disabled={edit}
+                  value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                 />
               </td>
+              {/* Buttons */}
               <td className="absolute">
                 <button
                   type="button"
-                  onClick={() => {
-                    setEdit(!edit);
-                  }}
-                  className="w-44 mt-8 px-7 py-2 bg-blood text-white-900 hover:bg-gray-darkest rounded-full text-lg font-bold align-bottom"
+                  onClick={() => setEdit(!edit)}
+                  className="w-44 mt-8 px-7 py-2 bg-blood text-white-900 hover:bg-gray-darkest rounded-full text-lg font-bold"
                 >
                   {edit ? "Edit" : "Cancel"}
                 </button>
                 <br />
                 <button
                   type="submit"
-                  className={`w-44 mt-8 px-7 py-2 bg-blood text-white-900 hover:bg-gray-darkest rounded-full text-lg font-bold align-bottom ${
+                  className={`w-44 mt-8 px-7 py-2 bg-blood text-white-900 hover:bg-gray-darkest rounded-full text-lg font-bold ${
                     edit && "hidden"
                   }`}
                 >
@@ -279,9 +263,11 @@ const EditProfile = () => {
                 </button>
               </td>
             </tr>
+
+            {/* ---------- STATE & DISTRICT ---------- */}
             <tr>
               <td>
-                <label for="state" className="font-semibold  leading-8">
+                <label htmlFor="state" className="font-semibold leading-8">
                   State:<font color="red">*</font>
                 </label>
                 <select
@@ -295,14 +281,14 @@ const EditProfile = () => {
                   className="w-full p-3 text-md border border-silver rounded"
                 >
                   {data.states.map((e, i) => (
-                    <option value={i} selected={state === i}>
+                    <option key={i} value={i} selected={state === i}>
                       {e.state}
                     </option>
                   ))}
                 </select>
               </td>
               <td>
-                <label for="district" className="font-semibold  leading-8">
+                <label htmlFor="district" className="font-semibold leading-8">
                   District:<font color="red">*</font>
                 </label>
                 <select
@@ -313,33 +299,33 @@ const EditProfile = () => {
                   className="w-full p-3 text-md border border-silver rounded"
                 >
                   {data.states[state].districts.map((e, i) => (
-                    <option value={i} selected={district === i}>
+                    <option key={i} value={i} selected={district === i}>
                       {e}
                     </option>
                   ))}
                 </select>
               </td>
             </tr>
+
+            {/* ---------- ADDRESS & MAP ---------- */}
             <tr>
               <td colSpan={3}>
-                <label className="font-semibold  leading-8">Address:</label>
+                <label className="font-semibold leading-8">Address:</label>
                 <input
                   className="w-full p-3 text-md border border-silver rounded"
                   type="text"
-                  placeholder="Enter your address"
                   disabled={edit}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                 />
               </td>
             </tr>
+
             <tr>
               <td colSpan={3}>
-                <div>
-                  <label className="font-semibold leading-7">
-                    Location:<font color="red">*</font>
-                  </label>
-                </div>
+                <label className="font-semibold leading-7">
+                  Location:<font color="red">*</font>
+                </label>
                 <div
                   style={{
                     display: "grid",
@@ -347,12 +333,15 @@ const EditProfile = () => {
                     gap: "1rem",
                   }}
                 >
+                  {/* Map Section */}
                   <div
                     className="w-full"
                     style={{ gridColumn: "2/4", gridRow: "1/3" }}
                   >
                     <div id="map" className="w-full h-[200px]"></div>
                   </div>
+
+                  {/* Latitude/Longitude Section */}
                   <div style={{ gridColumn: "1", gridRow: "1/2" }}>
                     <input
                       className="w-full p-3 text-md border border-silver rounded"
@@ -361,7 +350,6 @@ const EditProfile = () => {
                       placeholder="Latitude"
                       disabled
                       value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
                       required
                     />
                     <br />
@@ -373,14 +361,13 @@ const EditProfile = () => {
                       placeholder="Longitude"
                       disabled
                       value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
                       required
                     />
                     <button
                       type="button"
                       disabled={edit}
                       className="bg-purple text-center text-white-900 rounded-lg mt-4 px-4 py-2"
-                      onClick={() => fetchGeo()}
+                      onClick={fetchGeo}
                     >
                       Update Geocode
                     </button>

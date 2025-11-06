@@ -3,98 +3,94 @@ import axios from "../Api";
 import mapboxgl from "mapbox-gl";
 import Popup from "../Util/Popup";
 
-// --------------------------- COMPONENT PURPOSE ---------------------------
-// The BanksSearch component allows users to select a food bank (or multiple)
-// to donate food. It fetches available banks based on user's location (state, district)
-// and allows the user to click/select one. It also supports a popup with extra info.
-const BanksSearch = (props) => {
-  // --------------------------- STATES ---------------------------
-  const [popup, setPopup] = useState(-1); // controls which popup (if any) is open
-  const [data, setData] = useState([]); // stores list of available banks
-  const [selected, setSelected] = useState(-1); // keeps track of selected bank row
+// --------------------------- MAPBOX TOKEN ---------------------------
+mapboxgl.accessToken =
+  "pk.eyJ1IjoiY29yb2JvcmkiLCJhIjoiY2s3Y3FyaWx0MDIwbTNpbnc4emxkdndrbiJ9.9KeSiPVeMK0rWvJmTE0lVA";
+
+// --------------------------- COMPONENT ---------------------------
+const BanksSearch = ({ state, district, setBank }) => {
+  const [popup, setPopup] = useState(-1); // Which popup is open
+  const [data, setData] = useState([]);   // List of banks
+  const [selected, setSelected] = useState(-1); // Selected bank row
 
   // --------------------------- FETCH BANKS DATA ---------------------------
-  // When state or district (props) changes, send POST request to get available banks.
   useEffect(() => {
     axios
-      .post("/bank/user", props, { withCredentials: true })
-      .then(async (res) => {
-        setData(res.data); // store response data in 'data' state
-      })
-      .catch((error) => {
-        setData([]); // if request fails, clear data
-      });
-  }, [props.state, props.district]); // runs every time user changes location filters
+      .post("/bank/user", { state, district }, { withCredentials: true })
+      .then((res) => setData(res.data))
+      .catch(() => setData([]));
+  }, [state, district]);
 
-  // --------------------------- MAPBOX TOKEN ---------------------------
-  mapboxgl.accessToken =
-    "pk.eyJ1IjoiY29yb2JvcmkiLCJhIjoiY2s3Y3FyaWx0MDIwbTNpbnc4emxkdndrbiJ9.9KeSiPVeMK0rWvJmTE0lVA";
-
-  // --------------------------- RETURN (UI PART) ---------------------------
   return (
     <div className="mx-2 mt-3">
       {/* --------------------------- BANKS TABLE --------------------------- */}
-      <table className="border w-full text-center">
+      <table className="border w-full text-center rounded-md overflow-hidden">
         <thead>
           <tr>
-            <th className="border">Food Bank</th>
-            <th className="border">Parent Organisation</th>
-            <th className="border">Category</th>
-            <th className="border">Address</th>
+            <th className="border bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 px-4">
+              Food Bank
+            </th>
+            <th className="border bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 px-4">
+              Parent Organisation
+            </th>
+            <th className="border bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 px-4">
+              Category
+            </th>
+            <th className="border bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 px-4">
+              Address
+            </th>
           </tr>
         </thead>
 
-        <tbody className="p-3">
-          {/* If data is available, show table rows */}
-          {data.length ? (
-            data.map((e, i) => (
-              <tr
-                key={i}
-                className={`hover:bg-red hover:text-white-900 p-3 cursor-pointer ${
-                  selected === i ? "bg-red text-white-900" : ""
-                }`} // Highlight selected row
-                onClick={() => {
-                  // Toggle row selection
-                  // If already selected → deselect it
-                  // If new row → select it
-                  const isSelected = selected === i;
-                  setSelected(isSelected ? -1 : i);
-                  props.setBank(isSelected ? "" : e._id); // pass selected bank ID to parent
-                }}
-              >
-                {/* Each column shows info about the food bank */}
-                <td className="py-2 px-4 border">{e.name}</td>
-                <td className="py-2 px-4 border">{e.organisation}</td>
-                <td className="py-2 px-4 border">{e.category}</td>
-                <td className="py-2 px-4 border">
-                  <div className="flex justify-between items-center">
-                    <div className="w-full">{e.address}</div>
-                    <div className="flex items-center">
-                      &nbsp;&nbsp;
-                      {/* Info icon opens popup with detailed info */}
-                      <i
-                        className="fa-solid fa-circle-info fa-lg cursor-pointer"
-                        onClick={(event) => {
-                          event.stopPropagation(); // stop click from selecting the row
-                          setPopup(i); // open popup for this row
-                        }}
-                      ></i>
-                      &nbsp;&nbsp;&nbsp;
-                      {/* Show check icon if selected */}
-                      {selected === i ? (
-                        <i className="fa-regular fa-circle-check fa-lg"></i>
-                      ) : (
-                        <i className="fa-regular fa-circle fa-lg"></i>
-                      )}
+        <tbody>
+          {data.length > 0 ? (
+            data.map((bank, i) => {
+              const isSelected = selected === i;
+              return (
+                <tr
+                  key={bank._id}
+                  className={`cursor-pointer ${
+                    isSelected
+                      ? "bg-red-600 text-white dark:bg-red-700 dark:text-white"
+                      : "hover:bg-red-100 dark:hover:bg-red-800 hover:text-black dark:hover:text-white"
+                  }`}
+                  onClick={() => {
+                    setSelected(isSelected ? -1 : i);
+                    setBank(isSelected ? "" : bank._id);
+                  }}
+                >
+                  <td className="py-2 px-4 border">{bank.name}</td>
+                  <td className="py-2 px-4 border">{bank.organisation}</td>
+                  <td className="py-2 px-4 border">{bank.category}</td>
+                  <td className="py-2 px-4 border">
+                    <div className="flex justify-between items-center">
+                      <div className="w-full">{bank.address}</div>
+                      <div className="flex items-center">
+                        <i
+                          className="fa-solid fa-circle-info fa-lg cursor-pointer"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setPopup(i);
+                          }}
+                        ></i>
+                        &nbsp;&nbsp;&nbsp;
+                        {isSelected ? (
+                          <i className="fa-regular fa-circle-check fa-lg"></i>
+                        ) : (
+                          <i className="fa-regular fa-circle fa-lg"></i>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </td>
-              </tr>
-            ))
+                  </td>
+                </tr>
+              );
+            })
           ) : (
-            // If no data found
             <tr>
-              <td colSpan={4} className="text-center text-md font-bold my-6">
+              <td
+                colSpan={4}
+                className="text-center text-md font-bold py-6 dark:text-white"
+              >
                 No Data Found
               </td>
             </tr>
@@ -102,16 +98,18 @@ const BanksSearch = (props) => {
         </tbody>
       </table>
 
-      {/* --------------------------- POPUP COMPONENT --------------------------- */}
-      {/* Displays additional info for the selected bank */}
-      <Popup
-        popup={popup} // which popup to show (-1 = none)
-        setPopup={setPopup} // function to close popup
-        data={data[popup]} // send bank data to popup
-        handle="Food Bank" // heading for popup
-      />
+      {/* --------------------------- POPUP --------------------------- */}
+      {popup !== -1 && data[popup] && (
+        <Popup
+          popup={popup}
+          setPopup={setPopup}
+          data={data[popup]}
+          handle="Food Bank"
+        />
+      )}
     </div>
   );
 };
 
 export default BanksSearch;
+

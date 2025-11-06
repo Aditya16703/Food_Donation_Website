@@ -7,134 +7,132 @@ const Camps = () => {
   const [district, setDistrict] = useState(0);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [filtered, setFiltered] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     axios
       .get(
         `/camps/allCamps/${data.states[state].state}/${data.states[state].districts[district]}/${date}`
       )
-      .then((r) => setFiltered(r.data))
-      .catch((e) => alert("Something went wrong in MAin camps.js"));
+      .then((res) => {
+        setFiltered(res.data);
+        setError("");
+      })
+      .catch(() => setError("⚠️ Failed to fetch camp data."));
   }, [state, district, date]);
 
   return (
-    <div className="px-7">
-      <table cellPadding={7}>
-        <tr>
-          <td>
-            <label for="state" className="font-semibold  leading-8">
-              State:<font color="red">*</font>
-            </label>
-            <select
-              name="state"
-              id="state"
-              onChange={(e) => {
-                setState(e.target.value);
-                setDistrict(0);
-              }}
-              className="w-full p-3 text-md border border-silver rounded"
-            >
-              {data.states.map((e, i) => (
-                <option value={i} selected={state === i}>
-                  {e.state}
-                </option>
-              ))}
-            </select>
-          </td>
-          <td>
-            <label for="district" className="font-semibold  leading-8">
-              District:<font color="red">*</font>
-            </label>
-            <select
-              name="district"
-              id="district"
-              onChange={(e) => {
-                setDistrict(e.target.value);
-              }}
-              className="w-full p-3 text-md border border-silver rounded"
-            >
-              {
-                //select discrict of bank corresponding to state
-                data.states[state].districts.map((e, i) => (
-                  <option value={i} selected={district === i}>
-                    {e}
-                  </option>
-                ))
-              }
-            </select>
-          </td>
-          <td>
-            <label for="district" className="font-semibold  leading-8">
-              Date:<font color="red">*</font>
-            </label>
-            <input
-              type="date"
-              value={date}
-              className="w-full p-3 text-md border border-silver rounded"
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </td>
-        </tr>
-      </table>
-      <br />
-      <table className="w-full text-center">
-        <thead>
-          <th className="p-3 text-md border border-silver rounded">Date</th>
-          <th className="p-3 text-md border border-silver rounded">
-            Camp Name
-          </th>
-          <th className="p-3 text-md border border-silver rounded">Address</th>
-          <th className="p-3 text-md border border-silver rounded">State</th>
-          <th className="p-3 text-md border border-silver rounded">District</th>
-          <th className="p-3 text-md border border-silver rounded">Contact</th>
-          <th className="p-3 text-md border border-silver rounded">
-            Conducted By
-          </th>
-          <th className="p-3 text-md border border-silver rounded">
-            Organized By
-          </th>
-          <th className="p-3 text-md border border-silver rounded">Time</th>
-        </thead>
-        <tbody>
-          {
-            // printing camp data in filter section as all data is written oveer there and filter function is written in backend
-            filtered.map((e) => (
+    <div className="px-4 md:px-10 py-6 w-full overflow-x-auto">
+      {/* Filter Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div>
+          <label htmlFor="state" className="font-semibold block mb-1">
+            State:<span className="text-red-500">*</span>
+          </label>
+          <select
+            id="state"
+            value={state}
+            onChange={(e) => {
+              setState(Number(e.target.value));
+              setDistrict(0);
+            }}
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          >
+            {data.states.map((e, i) => (
+              <option key={i} value={i}>
+                {e.state}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="district" className="font-semibold block mb-1">
+            District:<span className="text-red-500">*</span>
+          </label>
+          <select
+            id="district"
+            value={district}
+            onChange={(e) => setDistrict(Number(e.target.value))}
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          >
+            {data.states[state].districts.map((d, i) => (
+              <option key={i} value={i}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="date" className="font-semibold block mb-1">
+            Date:<span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            id="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+        </div>
+      </div>
+
+      {/* Error or Data Table */}
+      {error ? (
+        <p className="text-center text-red-600 font-semibold">{error}</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-center text-gray-500 italic">No camps found.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-300 text-center text-sm md:text-md">
+            <thead className="bg-gray-100">
               <tr>
-                <td className="p-3 text-md border border-silver rounded">
-                  {new Date(e.date).toLocaleDateString()}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  {e.name}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  {e.address}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  {e.state}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  {e.district}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  {e.contact}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  {e.bankId.name}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  {e.organizer}
-                </td>
-                <td className="p-3 text-md border border-silver rounded">
-                  <code>
-                    {e.startTime}-{e.endTime}
-                  </code>
-                </td>
+                {[
+                  "Date",
+                  "Camp Name",
+                  "Address",
+                  "State",
+                  "District",
+                  "Contact",
+                  "Conducted By",
+                  "Organized By",
+                  "Time",
+                ].map((head, i) => (
+                  <th
+                    key={i}
+                    className="p-3 font-semibold border border-gray-300"
+                  >
+                    {head}
+                  </th>
+                ))}
               </tr>
-            ))
-          }
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {filtered.map((e, i) => (
+                <tr key={i} className="hover:bg-gray-50">
+                  <td className="p-3 border border-gray-300">
+                    {new Date(e.date).toLocaleDateString()}
+                  </td>
+                  <td className="p-3 border border-gray-300">{e.name}</td>
+                  <td className="p-3 border border-gray-300">{e.address}</td>
+                  <td className="p-3 border border-gray-300">{e.state}</td>
+                  <td className="p-3 border border-gray-300">{e.district}</td>
+                  <td className="p-3 border border-gray-300">{e.contact}</td>
+                  <td className="p-3 border border-gray-300">{e.bankId?.name}</td>
+                  <td className="p-3 border border-gray-300">{e.organizer}</td>
+                  <td className="p-3 border border-gray-300">
+                    <code>
+                      {e.startTime} - {e.endTime}
+                    </code>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
