@@ -1,28 +1,28 @@
 import React from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Link } from "react-router-dom"; // Removed "Outlet" because it was not used
 
-const Temp = (props) => {
+// Destructured props directly for cleaner code
+const Temp = ({ icon, title }) => {
   return (
     <>
-      {" "}
-      {/*It returns a JSX fragment that includes an icon and a title with some spacing in between. */}
-      <i className={`fa-solid ${props.icon}`}></i>&nbsp;&nbsp;&nbsp;{" "}
-      {props.title}
+      {/* Shows an icon and title with some spacing */}
+      <i className={`fa-solid ${icon}`}></i>&nbsp;&nbsp;&nbsp;
+      {title}
     </>
   );
 };
 
-//It uses a props.data array, which should contain objects with to, icon, and title properties.
-const UserNav = (props) => {
+// Destructured props here too for simplicity
+const UserNav = ({ data }) => {
+  // Fixed Tailwind colors (bg-gray → bg-gray-800, text-white-900 → text-white)
   const s1 =
-    "block m-9 ml-20 px-9 py-2 font-semibold text-lg rounded-full shadow-sm bg-gray text-white-900 hover:drop-shadow-md hover:opacity-80";
+    "block m-9 ml-20 px-9 py-2 font-semibold text-lg rounded-full shadow-sm bg-gray-800 text-white hover:drop-shadow-md hover:opacity-80";
 
   return (
     <div className="fixed">
-      {props.data.map((e) => (
-        //{ to: "/user/profile", icon: "fa-user", title: "My Profile" } example of one of data(from user.js from where userNav is called)
-        // navigate to (to link) at particular title
-        <Link to={e.to} className={s1}>
+      {data.map((e, index) => (
+        //  Added key={index} → React needs a unique key for each list item
+        <Link key={index} to={e.to} className={s1}>
           <Temp icon={e.icon} title={e.title} />
         </Link>
       ))}
