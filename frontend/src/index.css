@@ -29,11 +29,13 @@ button, a, i, input[type="submit"], input[type="button"] {
   cursor: pointer;
 }
 
-/* Popup */
-.popup {
-  @apply fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50;
-}
+/* Custom Tailwind classes must be inside a layer */
+@layer components {
+  .popup {
+    @apply fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50;
+  }
 
-.popup_inner {
-  @apply bg-white rounded-lg p-6 w-1/2 max-w-lg;
+  .popup_inner {
+    @apply bg-white rounded-lg p-6 w-1/2 max-w-lg;
+  }
 }
