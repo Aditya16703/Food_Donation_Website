@@ -9,7 +9,7 @@ const DropDown = ({ title, items = [], links = [] }) => {
     "rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-nowrap font-semibold hover:bg-blood hover:text-white dark:bg-gray-700 dark:text-white dark:hover:bg-red-700";
 
   return (
-    <div className="group inline-block relative">
+    <div className="group inline-block relative  dark:text-white-900">
       <button className="text-gray-700 font-semibold mx-4 rounded inline-flex">
         <span className={buttonClass}>
           {title} &nbsp;
