@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from "react";
 import logo from "../../assets/logo.jpg";
 import { Outlet, Link } from "react-router-dom";
@@ -8,10 +9,12 @@ import AuthContext from "../context/AuthContext";
 const Navbar = (props) => {
   const s1 =
     "bg-white drop-shadow-lg mx-3 px-7 py-2 rounded-md text-base font-medium hover:drop-shadow-xl hover:px-10 dark:hover:bg-midnight dark:hover:drop-shadow-dark-lg";
+
   const [theme, setTheme] = useState(0);
   const { getLoggedIn } = useContext(AuthContext);
   const doc = document.documentElement.classList;
 
+  // ✅ Load theme on mount
   useEffect(() => {
     let t = localStorage.getItem("theme");
     if (!t) {
@@ -22,6 +25,7 @@ const Navbar = (props) => {
     if (t === "1") doc.add("dark");
   }, []);
 
+  // ✅ Toggle theme between dark and light
   const toggleTheme = () => {
     const newTheme = theme === 0 ? 1 : 0;
     localStorage.setItem("theme", String(newTheme));
@@ -34,6 +38,7 @@ const Navbar = (props) => {
     <>
       <nav className="p-3 bg-white sticky top-0 z-10 dark:bg-gray-bg">
         <div className="flex items-center justify-between">
+          {/* ✅ Logo Section */}
           <Link to="/">
             <div className="flex items-center">
               <img
@@ -42,16 +47,18 @@ const Navbar = (props) => {
                 draggable={false}
                 alt="Annadata Logo"
               />
-              <div className="text-2xl font-bold ml-2  text-green dark:text-white ">
+              <div className="text-2xl font-bold ml-2 text-green dark:text-white">
                 Annadata
               </div>
             </div>
           </Link>
 
+          {/* ✅ Navigation Section */}
           <div className="flex items-center">
+            {/* 🔄 Changed 'children' → 'items' */}
             <DropDown
               title="About Us"
-              children={["Home", "About Annadata", "Contact Us"]}
+              items={["Home", "About Annadata", "Contact Us"]}
               links={["/", "/about", "/contactUs"]}
             />
 
@@ -60,6 +67,8 @@ const Navbar = (props) => {
                 <Link to={`/${props.user}/profile`} className={s1}>
                   <i className="fa-solid fa-user"></i>
                 </Link>
+
+                {/* ✅ Logout logic */}
                 <Link
                   to="/"
                   onClick={async () => {
@@ -77,14 +86,16 @@ const Navbar = (props) => {
               </>
             ) : (
               <>
+                {/* 🔄 Changed 'children' → 'items' */}
                 <DropDown
                   title="Looking For Food"
-                  children={["User Login/Register", "Food Bank Directory"]}
+                  items={["User Login/Register", "Food Bank Directory"]}
                   links={["/register/patient", "/bloodDirect"]}
                 />
+
                 <DropDown
                   title="Want To Donate Food"
-                  children={[
+                  items={[
                     "Food Donor Login/Register",
                     "Food Donation Camps",
                     "About Food Donation",
@@ -95,14 +106,16 @@ const Navbar = (props) => {
                     "/aboutBloodDonation",
                   ]}
                 />
+
                 <DropDown
                   title="Food Bank Login"
-                  children={["Login", "Add Your Foodbank"]}
+                  items={["Login", "Add Your Foodbank"]}
                   links={["/login/bank", "/register/bank"]}
                 />
               </>
             )}
 
+            {/* ✅ Theme toggle button */}
             <button
               className="mx-2 px-3 py-2 rounded-full bg-green-500 hover:shadow-lg"
               onClick={toggleTheme}
@@ -116,6 +129,8 @@ const Navbar = (props) => {
           </div>
         </div>
       </nav>
+
+      {/* ✅ Outlet renders nested routes */}
       <Outlet />
     </>
   );
