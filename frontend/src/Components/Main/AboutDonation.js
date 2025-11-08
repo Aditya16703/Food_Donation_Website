@@ -45,7 +45,7 @@ const AboutDonation = () => {
   ];
 
   return (
-    <section className="grid place-items-center dark:text-white">
+    <section className="grid place-items-center dark:text-white-900">
       <div className="container px-6 py-10">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold mb-2">Donation Process</h2>
@@ -68,7 +68,7 @@ const AboutDonation = () => {
                 alt={e.title}
               />
               <div className="p-4">
-                <h1 className="font-bold text-lg text-midnight dark:text-white mb-2">
+                <h1 className="font-bold text-lg text-midnight dark:text-white-900 mb-2">
                   {i + 1}. {e.title}
                 </h1>
                 <p className="text-justify text-gray-700 dark:text-gray-300 text-sm">
