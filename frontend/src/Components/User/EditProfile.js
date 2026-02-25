@@ -33,25 +33,33 @@ const EditProfile = () => {
   // ---------------------- USE EFFECT ----------------------
   // Runs once when the component loads
   useEffect(() => {
-    // Prefill form with user data
-    setName(user.name);
-    setAge(user.age);
-    setGender(user.gender);
-    setMail(user.email);
-    setPhone(user.phone);
+    if (user) {
+      // Prefill form with user data
+      setName(user.name || "");
+      setAge(user.age || 0);
+      setGender(user.gender || "male");
+      setMail(user.email || "");
+      setPhone(user.phone || "");
 
-    // Find indexes of user's state and district
-    data.states.forEach((e, i) => {
-      if (e.state === user.state) {
-        setState(i); // Match state
-        setDistrict(e.districts.indexOf(user.district)); // Match district
-      }
-    });
+      let stateIdx = 0;
+      let districtIdx = 0;
+      // Find indexes of user's state and district
+      data.states.forEach((e, i) => {
+        if (e.state === user.state) {
+          stateIdx = i; // Match state
+          const dIdx = e.districts.indexOf(user.district);
+          districtIdx = dIdx !== -1 ? dIdx : 0; // Match district
+        }
+      });
+      setState(stateIdx);
+      setDistrict(districtIdx);
 
-    // Set default dummy password for display (not editable)
-    setPassword("Lorem ipsum dolor sit amet consectetur adipisicing elit.");
-    setAddress(user.address);
-    setFood(foodGroups.indexOf(user.foodGroup));
+      // Set default dummy password for display (not editable)
+      setPassword("Lorem ipsum dolor sit amet consectetur adipisicing elit.");
+      setAddress(user.address || "");
+      const fIdx = foodGroups.indexOf(user.foodGroup);
+      setFood(fIdx !== -1 ? fIdx : 0);
+    }
   }, [user]); // Added dependency 'user' for safer data loading
   // -------------------------------------------------------
 
@@ -273,7 +281,7 @@ const EditProfile = () => {
                       disabled={edit}
                       value={state}
                       onChange={(e) => {
-                        setState(e.target.value);
+                        setState(Number(e.target.value));
                         setDistrict(0);
                       }}
                     >
@@ -294,7 +302,7 @@ const EditProfile = () => {
                       className="input-field appearance-none dark:bg-secondary-900/50 pr-8"
                       disabled={edit}
                       value={district}
-                      onChange={(e) => setDistrict(e.target.value)}
+                      onChange={(e) => setDistrict(Number(e.target.value))}
                     >
                       {data.states[state].districts.map((e, i) => (
                         <option key={i} value={i}>{e}</option>

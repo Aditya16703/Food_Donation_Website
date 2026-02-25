@@ -5,6 +5,7 @@ import Popup from "../Util/Popup";
 
 // --------------------------- MAPBOX TOKEN ---------------------------
 // Token assignment removed for push
+mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN || "pk.eyJ1IjoiZHVtbXkiLCJhIjoiY2R1bW15In0.dummy";
 
 // --------------------------- COMPONENT ---------------------------
 const BanksSearch = ({ state, district, setBank }) => {

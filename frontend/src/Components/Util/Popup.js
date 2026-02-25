@@ -6,6 +6,7 @@ const Popup = ({ popup, setPopup, data, handle }) => {
   const mapInstance = useRef(null);
 
   // Token assignment removed for push
+  mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN || "pk.eyJ1IjoiZHVtbXkiLCJhIjoiY2R1bW15In0.dummy";
 
   // Initialize Mapbox map only when popup opens and data has coordinates
   useEffect(() => {

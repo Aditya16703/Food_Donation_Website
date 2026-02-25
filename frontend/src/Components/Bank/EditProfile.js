@@ -31,35 +31,43 @@ const EditProfile = () => {
 
   // --------------------------- FILL USER DATA ---------------------------
   useEffect(() => {
-    // Load data from logged-in user
-    setName(user.name);
-    setHospital(user.hospital);
-    setContactPerson(user.contactPerson);
-    setCategory(user.category);
-    setWebsite(user.website);
-    setMail(user.email);
-    setPhone(user.phone);
+    if (user) {
+      // Load data from logged-in user
+      setName(user.name || "");
+      setHospital(user.hospital || "");
+      setContactPerson(user.contactPerson || "");
+      setCategory(user.category || "Private");
+      setWebsite(user.website || "");
+      setMail(user.email || "");
+      setPhone(user.phone || "");
 
-    // Match user's state and district from JSON file
-    data.states.forEach((e, i) => {
-      if (e.state === user.state) {
-        setState(i);
-        setDistrict(e.districts.indexOf(user.district));
-      }
-    });
+      let stateIdx = 0;
+      let districtIdx = 0;
+      // Match user's state and district from JSON file
+      data.states.forEach((e, i) => {
+        if (e.state === user.state) {
+          stateIdx = i;
+          const dIdx = e.districts.indexOf(user.district);
+          districtIdx = dIdx !== -1 ? dIdx : 0;
+        }
+      });
+      setState(stateIdx);
+      setDistrict(districtIdx);
 
-    // Default password is hidden placeholder
-    setPassword("Lorem ipsum dolor sit amet consectetur adipisicing elit.");
-    setAddress(user.address);
-    setLatitude(user.latitude);
-    setLongitude(user.longitude);
-  }, []);
+      // Default password is hidden placeholder
+      setPassword("Lorem ipsum dolor sit amet consectetur adipisicing elit.");
+      setAddress(user.address || "");
+      setLatitude(user.latitude || 0);
+      setLongitude(user.longitude || 0);
+    }
+  }, [user]);
 
   // --------------------------- MAP DISPLAY ---------------------------
   // Re-renders the map whenever coordinates change
   useEffect(() => {
     if (longitude === 0) return; // skip if coords not loaded yet
     // Token assignment removed for push
+    mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN || "pk.eyJ1IjoiZHVtbXkiLCJhIjoiY2R1bW15In0.dummy";
     const map = new mapboxgl.Map({
       container: "map",
       style: "mapbox://styles/mapbox/streets-v12",
@@ -294,7 +302,7 @@ const EditProfile = () => {
                                 disabled={edit}
                                 value={state}
                                 onChange={(e) => {
-                                    setState(e.target.value);
+                                    setState(Number(e.target.value));
                                     setDistrict(0);
                                 }}
                                 className="input-field appearance-none dark:bg-secondary-900/50 pr-8"
@@ -314,7 +322,7 @@ const EditProfile = () => {
                             <select
                                 disabled={edit}
                                 value={district}
-                                onChange={(e) => setDistrict(e.target.value)}
+                                onChange={(e) => setDistrict(Number(e.target.value))}
                                 className="input-field appearance-none dark:bg-secondary-900/50 pr-8"
                             >
                                 {data.states[state].districts.map((e, i) => (

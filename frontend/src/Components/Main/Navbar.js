@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import logo from "../../assets/logo.jpg";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import DropDown from "../Util/DropDown";
 import axios from "../Api";
 import AuthContext from "../context/AuthContext";
@@ -12,6 +12,7 @@ const Navbar = (props) => {
 
   const [theme, setTheme] = useState(0);
   const { getLoggedIn } = useContext(AuthContext);
+  const navigate = useNavigate();
   const doc = document.documentElement.classList;
 
   // ✅ Load theme on mount
@@ -72,12 +73,12 @@ const Navbar = (props) => {
                   <i className="fa-solid fa-user"></i>
                 </Link>
 
-                <Link
-                  to="/"
+                <button
                   onClick={async () => {
                     try {
                       await axios.get("/auth/logout");
                       await getLoggedIn();
+                      navigate("/");
                     } catch {
                       alert("Logout failed, please try again");
                     }
@@ -85,7 +86,7 @@ const Navbar = (props) => {
                   className="btn-primary py-2 text-sm"
                 >
                   Log Out
-                </Link>
+                </button>
               </div>
             ) : (
               <>
@@ -228,6 +229,7 @@ const Navbar = (props) => {
                       await axios.get("/auth/logout");
                       await getLoggedIn();
                       setIsMobileMenuOpen(false);
+                      navigate("/");
                     } catch {
                       alert("Logout failed, please try again");
                     }
